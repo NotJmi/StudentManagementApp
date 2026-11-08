@@ -26,7 +26,9 @@ public class Main {
                     AuthService.login(email, password);
 
             if (!result.success) {
-                System.out.println("Login failed: " + result.message);
+                System.out.println(
+                        "Login failed: " + result.message
+                );
                 return;
             }
 
@@ -34,7 +36,16 @@ public class Main {
             System.out.println("Email: " + result.email);
             System.out.println("Role: " + result.role);
 
-            // Step 2: Request subjects using authenticated token
+            // Step 2: Check user permissions
+            if (!"admin".equalsIgnoreCase(result.role)) {
+                System.out.println(
+                        "Access denied. Only Admin users "
+                        + "can view subjects."
+                );
+                return;
+            }
+
+            // Step 3: Fetch subjects
             System.out.println("\nFetching subjects...");
 
             String response = SupabaseClient.get(
@@ -52,8 +63,9 @@ public class Main {
 
         } finally {
 
-            // Clear the authenticated session
+            // Step 4: Clear authentication session
             AuthService.logout();
+            System.out.println("\nLogged out.");
         }
     }
 }

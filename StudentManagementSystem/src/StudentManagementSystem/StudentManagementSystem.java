@@ -28,6 +28,14 @@ public class StudentManagementSystem extends javax.swing.JFrame {
     cl.first(getContentPane());
 
     setLocationRelativeTo(null);
+    
+}
+    private void showMainContent(String cardName) {
+
+    CardLayout cl =
+            (CardLayout) MainContentPanel.getLayout();
+
+    cl.show(MainContentPanel, cardName);
 }
 
     /**
@@ -52,6 +60,20 @@ public class StudentManagementSystem extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jButton4 = new javax.swing.JButton();
         Dashboard = new javax.swing.JPanel();
+        jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
+        jButton8 = new javax.swing.JButton();
+        jButton9 = new javax.swing.JButton();
+        jButton10 = new javax.swing.JButton();
+        jButton11 = new javax.swing.JButton();
+        MainContentPanel = new javax.swing.JPanel();
+        Students = new javax.swing.JPanel();
+        Subjects = new javax.swing.JPanel();
+        Grades = new javax.swing.JPanel();
+        Reports = new javax.swing.JPanel();
+        Enrollments = new javax.swing.JPanel();
+        SideDashboard = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new java.awt.CardLayout());
@@ -65,7 +87,7 @@ public class StudentManagementSystem extends javax.swing.JFrame {
         jButton1.addActionListener(this::jButton1ActionPerformed);
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Have an account?");
+        jLabel1.setText("Don't have an account?");
 
         javax.swing.GroupLayout LoginPageLayout = new javax.swing.GroupLayout(LoginPage);
         LoginPage.setLayout(LoginPageLayout);
@@ -152,15 +174,154 @@ public class StudentManagementSystem extends javax.swing.JFrame {
 
         getContentPane().add(SignUpPage, "card3");
 
+        jButton5.setText("Dashboard");
+        jButton5.addActionListener(this::jButton5ActionPerformed);
+
+        jButton6.setText("Students");
+        jButton6.addActionListener(this::jButton6ActionPerformed);
+
+        jButton7.setText("Subjects");
+        jButton7.addActionListener(this::jButton7ActionPerformed);
+
+        jButton8.setText("Enrollments");
+        jButton8.addActionListener(this::jButton8ActionPerformed);
+
+        jButton9.setText("Grades");
+        jButton9.addActionListener(this::jButton9ActionPerformed);
+
+        jButton10.setText("Reports");
+        jButton10.addActionListener(this::jButton10ActionPerformed);
+
+        jButton11.setText("Logout");
+        jButton11.addActionListener(this::jButton11ActionPerformed);
+
+        MainContentPanel.setLayout(new java.awt.CardLayout());
+
+        javax.swing.GroupLayout StudentsLayout = new javax.swing.GroupLayout(Students);
+        Students.setLayout(StudentsLayout);
+        StudentsLayout.setHorizontalGroup(
+            StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 600, Short.MAX_VALUE)
+        );
+        StudentsLayout.setVerticalGroup(
+            StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 491, Short.MAX_VALUE)
+        );
+
+        MainContentPanel.add(Students, "card2");
+
+        javax.swing.GroupLayout SubjectsLayout = new javax.swing.GroupLayout(Subjects);
+        Subjects.setLayout(SubjectsLayout);
+        SubjectsLayout.setHorizontalGroup(
+            SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 600, Short.MAX_VALUE)
+        );
+        SubjectsLayout.setVerticalGroup(
+            SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 491, Short.MAX_VALUE)
+        );
+
+        MainContentPanel.add(Subjects, "card3");
+
+        javax.swing.GroupLayout GradesLayout = new javax.swing.GroupLayout(Grades);
+        Grades.setLayout(GradesLayout);
+        GradesLayout.setHorizontalGroup(
+            GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 600, Short.MAX_VALUE)
+        );
+        GradesLayout.setVerticalGroup(
+            GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 491, Short.MAX_VALUE)
+        );
+
+        MainContentPanel.add(Grades, "card4");
+
+        javax.swing.GroupLayout ReportsLayout = new javax.swing.GroupLayout(Reports);
+        Reports.setLayout(ReportsLayout);
+        ReportsLayout.setHorizontalGroup(
+            ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 600, Short.MAX_VALUE)
+        );
+        ReportsLayout.setVerticalGroup(
+            ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
+        MainContentPanel.add(Reports, "card5");
+
+        javax.swing.GroupLayout EnrollmentsLayout = new javax.swing.GroupLayout(Enrollments);
+        Enrollments.setLayout(EnrollmentsLayout);
+        EnrollmentsLayout.setHorizontalGroup(
+            EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 600, Short.MAX_VALUE)
+        );
+        EnrollmentsLayout.setVerticalGroup(
+            EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 491, Short.MAX_VALUE)
+        );
+
+        MainContentPanel.add(Enrollments, "card6");
+
+        javax.swing.GroupLayout SideDashboardLayout = new javax.swing.GroupLayout(SideDashboard);
+        SideDashboard.setLayout(SideDashboardLayout);
+        SideDashboardLayout.setHorizontalGroup(
+            SideDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 600, Short.MAX_VALUE)
+        );
+        SideDashboardLayout.setVerticalGroup(
+            SideDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 491, Short.MAX_VALUE)
+        );
+
+        MainContentPanel.add(SideDashboard, "card7");
+
         javax.swing.GroupLayout DashboardLayout = new javax.swing.GroupLayout(Dashboard);
         Dashboard.setLayout(DashboardLayout);
         DashboardLayout.setHorizontalGroup(
             DashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 858, Short.MAX_VALUE)
+            .addGroup(DashboardLayout.createSequentialGroup()
+                .addGap(48, 48, 48)
+                .addGroup(DashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(DashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jButton9)
+                        .addComponent(jButton11)
+                        .addComponent(jButton5)
+                        .addComponent(jButton7)
+                        .addComponent(jButton10)
+                        .addComponent(jButton8))
+                    .addGroup(DashboardLayout.createSequentialGroup()
+                        .addComponent(jButton6)
+                        .addGap(17, 17, 17)))
+                .addContainerGap(711, Short.MAX_VALUE))
+            .addGroup(DashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, DashboardLayout.createSequentialGroup()
+                    .addContainerGap(252, Short.MAX_VALUE)
+                    .addComponent(MainContentPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap()))
         );
         DashboardLayout.setVerticalGroup(
             DashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 503, Short.MAX_VALUE)
+            .addGroup(DashboardLayout.createSequentialGroup()
+                .addGap(71, 71, 71)
+                .addComponent(jButton5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                .addComponent(jButton6)
+                .addGap(31, 31, 31)
+                .addComponent(jButton7)
+                .addGap(38, 38, 38)
+                .addComponent(jButton8)
+                .addGap(48, 48, 48)
+                .addComponent(jButton9)
+                .addGap(32, 32, 32)
+                .addComponent(jButton10)
+                .addGap(38, 38, 38)
+                .addComponent(jButton11)
+                .addGap(41, 41, 41))
+            .addGroup(DashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(DashboardLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(MainContentPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 491, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
         getContentPane().add(Dashboard, "card4");
@@ -361,6 +522,61 @@ SwingWorker<String, Void> worker =
 worker.execute();
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        // TODO add your handling code here:   
+    showMainContent("card7");
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        // TODO add your handling code here:
+            showMainContent("card3");
+
+    }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton11ActionPerformed
+        // TODO add your handling code here:
+       
+    int choice = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to logout?",
+            "Confirm Logout",
+            JOptionPane.YES_NO_OPTION
+    );
+
+    if (choice == JOptionPane.YES_OPTION) {
+
+        AuthService.logout();
+
+        jTextField2.setText("");
+        jPasswordField2.setText("");
+
+        CardLayout cl =
+                (CardLayout) getContentPane().getLayout();
+
+        cl.show(getContentPane(), "card2");
+    }
+    }//GEN-LAST:event_jButton11ActionPerformed
+
+    private void jButton10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton10ActionPerformed
+        // TODO add your handling code here:
+            showMainContent("card5");
+    }//GEN-LAST:event_jButton10ActionPerformed
+
+    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
+        // TODO add your handling code here:
+            showMainContent("card4");
+    }//GEN-LAST:event_jButton9ActionPerformed
+
+    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+        // TODO add your handling code here:
+            showMainContent("card6");
+    }//GEN-LAST:event_jButton8ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        // TODO add your handling code here:
+    showMainContent("card2");
+    }//GEN-LAST:event_jButton6ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -388,12 +604,26 @@ worker.execute();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Dashboard;
+    private javax.swing.JPanel Enrollments;
+    private javax.swing.JPanel Grades;
     private javax.swing.JPanel LoginPage;
+    private javax.swing.JPanel MainContentPanel;
+    private javax.swing.JPanel Reports;
+    private javax.swing.JPanel SideDashboard;
     private javax.swing.JPanel SignUpPage;
+    private javax.swing.JPanel Students;
+    private javax.swing.JPanel Subjects;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton10;
+    private javax.swing.JButton jButton11;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
+    private javax.swing.JButton jButton8;
+    private javax.swing.JButton jButton9;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPasswordField jPasswordField2;
@@ -403,22 +633,13 @@ worker.execute();
     // End of variables declaration//GEN-END:variables
 private void showDashboard(String email, String role) {
 
-    Dashboard.removeAll();
-    Dashboard.setLayout(new BorderLayout());
+    setTitle("Student Management System - " + email);
 
-    JLabel welcomeLabel = new JLabel(
-            "<html><center><h1>Student Management System</h1>"
-            + "<h2>Welcome, " + email + "</h2>"
-            + "<p>Role: " + role + "</p></center></html>",
-            SwingConstants.CENTER
-    );
+    showMainContent("card7");
 
-    Dashboard.add(welcomeLabel, BorderLayout.CENTER);
+    CardLayout cl =
+            (CardLayout) getContentPane().getLayout();
 
-    Dashboard.revalidate();
-    Dashboard.repaint();
-
-    CardLayout cl = (CardLayout) getContentPane().getLayout();
     cl.show(getContentPane(), "card4");
 }
 }
