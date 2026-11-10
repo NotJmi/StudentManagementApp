@@ -25,17 +25,13 @@ public class StudentManagementSystem extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(StudentManagementSystem.class.getName());
 
-    /**
-     * Creates new form StudentManagementSystem
-     */
+    private final List<String> subjectNames = new ArrayList<>();
+
     public StudentManagementSystem() {
     initComponents();
 
     CardLayout cl = (CardLayout) getContentPane().getLayout();
     cl.first(getContentPane());
-
-    // Dashboard Add Students button
-    jButton12.addActionListener(evt -> showMainContent("card8"));
 
     setLocationRelativeTo(null);
 }
@@ -303,6 +299,106 @@ private void loadRecentStudents() {
 
     worker.execute();
 }
+// ==========================================
+// LOAD SUBJECTS FROM SUPABASE
+// ==========================================
+
+private void loadSubjects() {
+
+    jButton7.setEnabled(false);
+
+    SwingWorker<List<String>, Void> worker =
+            new SwingWorker<List<String>, Void>() {
+
+        @Override
+        protected List<String> doInBackground() throws Exception {
+
+            String response = SupabaseClient.get(
+                "/rest/v1/subjects?select=name&order=name.asc"
+            );
+
+            JsonArray subjects =
+                    JsonParser.parseString(response).getAsJsonArray();
+
+            List<String> names = new ArrayList<>();
+
+            for (int i = 0; i < subjects.size(); i++) {
+
+                JsonObject subject =
+                        subjects.get(i).getAsJsonObject();
+
+                names.add(subject.get("name").getAsString());
+            }
+
+            return names;
+        }
+
+        @Override
+        protected void done() {
+
+            jButton7.setEnabled(true);
+
+            try {
+                subjectNames.clear();
+                subjectNames.addAll(get());
+
+                filterSubjects();
+
+            } catch (Exception ex) {
+
+                Throwable cause = ex.getCause() == null
+                        ? ex : ex.getCause();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Unable to load subjects:\n"
+                    + cause.getMessage(),
+                    "Subjects Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    };
+
+    worker.execute();
+}
+
+
+// ==========================================
+// SEARCH SUBJECTS
+// ==========================================
+
+private void filterSubjects() {
+
+    String search = jTextField8.getText()
+            .trim()
+            .toLowerCase();
+
+    DefaultTableModel model = new DefaultTableModel(
+        new String[]{"No.", "Subject Name"},
+        0
+    ) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+
+    int number = 1;
+
+    for (String subject : subjectNames) {
+
+        if (subject.toLowerCase().contains(search)) {
+
+            model.addRow(new Object[]{
+                number++,
+                subject
+            });
+        }
+    }
+
+    jTable3.setModel(model);
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -334,18 +430,6 @@ private void loadRecentStudents() {
         jButton10 = new javax.swing.JButton();
         jButton11 = new javax.swing.JButton();
         MainContentPanel = new javax.swing.JPanel();
-        Students = new javax.swing.JPanel();
-        jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jButton15 = new javax.swing.JButton();
-        jButton16 = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
-        Subjects = new javax.swing.JPanel();
-        Grades = new javax.swing.JPanel();
-        Reports = new javax.swing.JPanel();
-        Enrollments = new javax.swing.JPanel();
         SideDashboard = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -358,6 +442,25 @@ private void loadRecentStudents() {
         jButton14 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
+        Students = new javax.swing.JPanel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
+        jButton15 = new javax.swing.JButton();
+        jButton16 = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
+        Subjects = new javax.swing.JPanel();
+        jLabel17 = new javax.swing.JLabel();
+        jLabel18 = new javax.swing.JLabel();
+        jButton19 = new javax.swing.JButton();
+        jTextField8 = new javax.swing.JTextField();
+        jButton20 = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTable3 = new javax.swing.JTable();
+        Enrollments = new javax.swing.JPanel();
+        Grades = new javax.swing.JPanel();
+        Reports = new javax.swing.JPanel();
         AddStudentForm = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
@@ -372,6 +475,14 @@ private void loadRecentStudents() {
         jComboBox1 = new javax.swing.JComboBox<>();
         jButton17 = new javax.swing.JButton();
         jButton18 = new javax.swing.JButton();
+        AddNewSubjectForm = new javax.swing.JPanel();
+        jLabel19 = new javax.swing.JLabel();
+        jLabel20 = new javax.swing.JLabel();
+        jLabel21 = new javax.swing.JLabel();
+        jTextField9 = new javax.swing.JTextField();
+        jButton21 = new javax.swing.JButton();
+        jButton22 = new javax.swing.JButton();
+        jLabel22 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new java.awt.CardLayout());
@@ -495,124 +606,6 @@ private void loadRecentStudents() {
 
         MainContentPanel.setLayout(new java.awt.CardLayout());
 
-        jLabel9.setText("Students Management");
-
-        jLabel10.setText("Manage student information and academic records.");
-
-        jTextField1.addActionListener(this::jTextField1ActionPerformed);
-
-        jButton15.setText("+Add Students");
-        jButton15.addActionListener(this::jButton15ActionPerformed);
-
-        jButton16.setText("Search");
-        jButton16.addActionListener(this::jButton16ActionPerformed);
-
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
-            },
-            new String [] {
-                "Student ID", "First Name", "Last Name", "Course", "Year Level"
-            }
-        ));
-        jScrollPane2.setViewportView(jTable2);
-
-        javax.swing.GroupLayout StudentsLayout = new javax.swing.GroupLayout(Students);
-        Students.setLayout(StudentsLayout);
-        StudentsLayout.setHorizontalGroup(
-            StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(StudentsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(StudentsLayout.createSequentialGroup()
-                        .addGroup(StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel10)
-                            .addComponent(jLabel9)
-                            .addGroup(StudentsLayout.createSequentialGroup()
-                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton15)))
-                        .addGap(0, 30, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        StudentsLayout.setVerticalGroup(
-            StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(StudentsLayout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addComponent(jLabel9)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel10)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jButton15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 26, Short.MAX_VALUE)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(55, Short.MAX_VALUE))
-        );
-
-        MainContentPanel.add(Students, "card2");
-
-        javax.swing.GroupLayout SubjectsLayout = new javax.swing.GroupLayout(Subjects);
-        Subjects.setLayout(SubjectsLayout);
-        SubjectsLayout.setHorizontalGroup(
-            SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 600, Short.MAX_VALUE)
-        );
-        SubjectsLayout.setVerticalGroup(
-            SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 497, Short.MAX_VALUE)
-        );
-
-        MainContentPanel.add(Subjects, "card3");
-
-        javax.swing.GroupLayout GradesLayout = new javax.swing.GroupLayout(Grades);
-        Grades.setLayout(GradesLayout);
-        GradesLayout.setHorizontalGroup(
-            GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 600, Short.MAX_VALUE)
-        );
-        GradesLayout.setVerticalGroup(
-            GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 497, Short.MAX_VALUE)
-        );
-
-        MainContentPanel.add(Grades, "card4");
-
-        javax.swing.GroupLayout ReportsLayout = new javax.swing.GroupLayout(Reports);
-        Reports.setLayout(ReportsLayout);
-        ReportsLayout.setHorizontalGroup(
-            ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 600, Short.MAX_VALUE)
-        );
-        ReportsLayout.setVerticalGroup(
-            ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-
-        MainContentPanel.add(Reports, "card5");
-
-        javax.swing.GroupLayout EnrollmentsLayout = new javax.swing.GroupLayout(Enrollments);
-        Enrollments.setLayout(EnrollmentsLayout);
-        EnrollmentsLayout.setHorizontalGroup(
-            EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 600, Short.MAX_VALUE)
-        );
-        EnrollmentsLayout.setVerticalGroup(
-            EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 497, Short.MAX_VALUE)
-        );
-
-        MainContentPanel.add(Enrollments, "card6");
-
         jLabel3.setText("Dashboard Overview");
 
         jLabel4.setText("Welcome back! Here's your academic summary.");
@@ -626,6 +619,7 @@ private void loadRecentStudents() {
         jLabel8.setText(" – Pending Grades");
 
         jButton12.setText("Add Students");
+        jButton12.addActionListener(this::jButton12ActionPerformed);
 
         jButton13.setText("Add Subjects");
         jButton13.addActionListener(this::jButton13ActionPerformed);
@@ -705,6 +699,174 @@ private void loadRecentStudents() {
         );
 
         MainContentPanel.add(SideDashboard, "card7");
+
+        jLabel9.setText("Students Management");
+
+        jLabel10.setText("Manage student information and academic records.");
+
+        jTextField1.addActionListener(this::jTextField1ActionPerformed);
+
+        jButton15.setText("+Add Students");
+        jButton15.addActionListener(this::jButton15ActionPerformed);
+
+        jButton16.setText("Search");
+        jButton16.addActionListener(this::jButton16ActionPerformed);
+
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "Student ID", "First Name", "Last Name", "Course", "Year Level"
+            }
+        ));
+        jScrollPane2.setViewportView(jTable2);
+
+        javax.swing.GroupLayout StudentsLayout = new javax.swing.GroupLayout(Students);
+        Students.setLayout(StudentsLayout);
+        StudentsLayout.setHorizontalGroup(
+            StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(StudentsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(StudentsLayout.createSequentialGroup()
+                        .addGroup(StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel9)
+                            .addGroup(StudentsLayout.createSequentialGroup()
+                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton15)))
+                        .addGap(0, 30, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        StudentsLayout.setVerticalGroup(
+            StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(StudentsLayout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addComponent(jLabel9)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(StudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 26, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(55, Short.MAX_VALUE))
+        );
+
+        MainContentPanel.add(Students, "card2");
+
+        jLabel17.setText("Subjects Management");
+
+        jLabel18.setText("Manage the academic subjects offered by your institution.");
+
+        jButton19.setText("+ Add Subject");
+        jButton19.addActionListener(this::jButton19ActionPerformed);
+
+        jTextField8.addActionListener(this::jTextField8ActionPerformed);
+
+        jButton20.setText("Search");
+        jButton20.addActionListener(this::jButton20ActionPerformed);
+
+        jTable3.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "No.", "Subject Name"
+            }
+        ));
+        jScrollPane3.setViewportView(jTable3);
+
+        javax.swing.GroupLayout SubjectsLayout = new javax.swing.GroupLayout(Subjects);
+        Subjects.setLayout(SubjectsLayout);
+        SubjectsLayout.setHorizontalGroup(
+            SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(SubjectsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jScrollPane3)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SubjectsLayout.createSequentialGroup()
+                            .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 322, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jButton20, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jButton19)))
+                    .addComponent(jLabel17)
+                    .addComponent(jLabel18))
+                .addContainerGap(40, Short.MAX_VALUE))
+        );
+        SubjectsLayout.setVerticalGroup(
+            SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(SubjectsLayout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(jLabel17)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel18)
+                .addGap(18, 18, 18)
+                .addGroup(SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jButton20, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField8)
+                    .addComponent(jButton19, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 353, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        MainContentPanel.add(Subjects, "card3");
+
+        javax.swing.GroupLayout EnrollmentsLayout = new javax.swing.GroupLayout(Enrollments);
+        Enrollments.setLayout(EnrollmentsLayout);
+        EnrollmentsLayout.setHorizontalGroup(
+            EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 600, Short.MAX_VALUE)
+        );
+        EnrollmentsLayout.setVerticalGroup(
+            EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 497, Short.MAX_VALUE)
+        );
+
+        MainContentPanel.add(Enrollments, "card6");
+
+        javax.swing.GroupLayout GradesLayout = new javax.swing.GroupLayout(Grades);
+        Grades.setLayout(GradesLayout);
+        GradesLayout.setHorizontalGroup(
+            GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 600, Short.MAX_VALUE)
+        );
+        GradesLayout.setVerticalGroup(
+            GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 497, Short.MAX_VALUE)
+        );
+
+        MainContentPanel.add(Grades, "card4");
+
+        javax.swing.GroupLayout ReportsLayout = new javax.swing.GroupLayout(Reports);
+        Reports.setLayout(ReportsLayout);
+        ReportsLayout.setHorizontalGroup(
+            ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 600, Short.MAX_VALUE)
+        );
+        ReportsLayout.setVerticalGroup(
+            ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
+        MainContentPanel.add(Reports, "card5");
 
         jLabel11.setText("Add New Student");
 
@@ -798,6 +960,63 @@ private void loadRecentStudents() {
         );
 
         MainContentPanel.add(AddStudentForm, "card8");
+
+        jLabel19.setText("Add New Subject");
+
+        jLabel20.setText("Enter the details of the new academic subject.");
+
+        jLabel21.setText("Subject Name");
+
+        jTextField9.addActionListener(this::jTextField9ActionPerformed);
+
+        jButton21.setText("Cancel");
+        jButton21.addActionListener(this::jButton21ActionPerformed);
+
+        jButton22.setText("Save Subject");
+        jButton22.addActionListener(this::jButton22ActionPerformed);
+
+        jLabel22.setText("Enter the complete subject name.");
+
+        javax.swing.GroupLayout AddNewSubjectFormLayout = new javax.swing.GroupLayout(AddNewSubjectForm);
+        AddNewSubjectForm.setLayout(AddNewSubjectFormLayout);
+        AddNewSubjectFormLayout.setHorizontalGroup(
+            AddNewSubjectFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AddNewSubjectFormLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(AddNewSubjectFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(AddNewSubjectFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel19)
+                        .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel21)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddNewSubjectFormLayout.createSequentialGroup()
+                            .addComponent(jButton21)
+                            .addGap(18, 18, 18)
+                            .addComponent(jButton22))
+                        .addComponent(jTextField9))
+                    .addComponent(jLabel22))
+                .addContainerGap(322, Short.MAX_VALUE))
+        );
+        AddNewSubjectFormLayout.setVerticalGroup(
+            AddNewSubjectFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AddNewSubjectFormLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel19)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel20)
+                .addGap(44, 44, 44)
+                .addComponent(jLabel21)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextField9, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel22)
+                .addGap(40, 40, 40)
+                .addGroup(AddNewSubjectFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton21, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton22, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(226, Short.MAX_VALUE))
+        );
+
+        MainContentPanel.add(AddNewSubjectForm, "card9");
 
         javax.swing.GroupLayout DashboardLayout = new javax.swing.GroupLayout(Dashboard);
         Dashboard.setLayout(DashboardLayout);
@@ -1055,7 +1274,7 @@ worker.execute();
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
         // TODO add your handling code here:
             showMainContent("card3");
-
+    loadSubjects();
     }//GEN-LAST:event_jButton7ActionPerformed
 
     private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton11ActionPerformed
@@ -1252,11 +1471,144 @@ worker.execute();
 
     private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton13ActionPerformed
         // TODO add your handling code here:
+         showMainContent("card3");
+         loadSubjects();
     }//GEN-LAST:event_jButton13ActionPerformed
 
     private void jButton14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton14ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton14ActionPerformed
+
+    private void jTextField8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField8ActionPerformed
+        // TODO add your handling code here:
+            filterSubjects();
+    }//GEN-LAST:event_jTextField8ActionPerformed
+
+    private void jButton20ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton20ActionPerformed
+        // TODO add your handling code here:
+            filterSubjects();
+    }//GEN-LAST:event_jButton20ActionPerformed
+
+    private void jButton19ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton19ActionPerformed
+        // TODO add your handling code here:
+         jTextField9.setText("");
+
+    showMainContent("card9");
+
+    jTextField9.requestFocusInWindow();
+    }//GEN-LAST:event_jButton19ActionPerformed
+
+    private void jButton21ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton21ActionPerformed
+        // TODO add your handling code here:
+        jTextField9.setText("");
+
+    showMainContent("card3");
+    }//GEN-LAST:event_jButton21ActionPerformed
+
+    private void jButton22ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton22ActionPerformed
+        // TODO add your handling code here:
+        String subjectName = jTextField9.getText().trim();
+
+    // Validate input
+    if (subjectName.isEmpty()) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Please enter a subject name.",
+            "Missing Information",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        jTextField9.requestFocus();
+        return;
+    }
+
+    // Check duplicate names in the currently loaded list
+    for (String existing : subjectNames) {
+
+        if (existing.equalsIgnoreCase(subjectName)) {
+
+            JOptionPane.showMessageDialog(
+                this,
+                "This subject already exists.",
+                "Duplicate Subject",
+                JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+    }
+
+    // Create JSON body
+    JsonObject subject = new JsonObject();
+    subject.addProperty("name", subjectName);
+
+    jButton22.setEnabled(false);
+    jButton22.setText("Saving...");
+
+    SwingWorker<String, Void> worker =
+            new SwingWorker<String, Void>() {
+
+        @Override
+        protected String doInBackground() throws Exception {
+
+            return SupabaseClient.post(
+                "/rest/v1/subjects",
+                subject
+            );
+        }
+
+        @Override
+        protected void done() {
+
+            jButton22.setEnabled(true);
+            jButton22.setText("Save Subject");
+
+            try {
+
+                get();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Subject successfully added!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+
+                jTextField9.setText("");
+
+                showMainContent("card3");
+
+                loadSubjects();
+                updateDashboardCounts();
+
+            } catch (Exception ex) {
+
+                Throwable cause = ex.getCause() == null
+                        ? ex : ex.getCause();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Unable to save subject:\n"
+                    + cause.getMessage(),
+                    "Save Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    };
+
+    worker.execute();
+    }//GEN-LAST:event_jButton22ActionPerformed
+
+    private void jTextField9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField9ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField9ActionPerformed
+
+    private void jButton12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton12ActionPerformed
+        // TODO add your handling code here:
+        showMainContent("card8");
+    }//GEN-LAST:event_jButton12ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1284,6 +1636,7 @@ worker.execute();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel AddNewSubjectForm;
     private javax.swing.JPanel AddStudentForm;
     private javax.swing.JPanel Dashboard;
     private javax.swing.JPanel Enrollments;
@@ -1305,7 +1658,11 @@ worker.execute();
     private javax.swing.JButton jButton16;
     private javax.swing.JButton jButton17;
     private javax.swing.JButton jButton18;
+    private javax.swing.JButton jButton19;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton20;
+    private javax.swing.JButton jButton21;
+    private javax.swing.JButton jButton22;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
@@ -1322,7 +1679,13 @@ worker.execute();
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1334,8 +1697,10 @@ worker.execute();
     private javax.swing.JPasswordField jPasswordField3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
+    private javax.swing.JTable jTable3;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
@@ -1343,6 +1708,8 @@ worker.execute();
     private javax.swing.JTextField jTextField5;
     private javax.swing.JTextField jTextField6;
     private javax.swing.JTextField jTextField7;
+    private javax.swing.JTextField jTextField8;
+    private javax.swing.JTextField jTextField9;
     // End of variables declaration//GEN-END:variables
 private void showDashboard(String email, String role) {
 
