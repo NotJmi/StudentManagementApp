@@ -17,6 +17,10 @@ import com.studentmanagement.config.SupabaseClient;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 /**
  *
  * @author jamesandrewwalker
@@ -26,11 +30,26 @@ public class StudentManagementSystem extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(StudentManagementSystem.class.getName());
 
     private final List<String> subjectNames = new ArrayList<>();
+    
+    // Stores enrollment records currently loaded from Supabase.
+    private final List<Object[]> enrollmentRows = new ArrayList<>();
 
     private GradesPanel gradesPanel;
 
     public StudentManagementSystem() {
     initComponents();
+    
+    jTable4.getSelectionModel().addListSelectionListener(e -> {
+
+    if (!e.getValueIsAdjusting()) {
+        loadSelectedEnrollmentIntoForm();
+    }
+
+});
+    
+    
+    initializeEnrollmentControls();
+
 
     // Grades module (card4): replaces the empty NetBeans placeholder panel.
     gradesPanel = new GradesPanel(this::updateDashboardCounts);
@@ -42,6 +61,136 @@ public class StudentManagementSystem extends javax.swing.JFrame {
     cl.first(getContentPane());
 
     setLocationRelativeTo(null);
+}
+    // Selects an existing item in a ComboBox.
+// Adds the item if it does not exist.
+private void selectComboItem(
+        javax.swing.JComboBox<String> combo,
+        String value) {
+
+    for (int i = 0; i < combo.getItemCount(); i++) {
+
+        if (combo.getItemAt(i).equalsIgnoreCase(value)) {
+            combo.setSelectedIndex(i);
+            return;
+        }
+    }
+
+    combo.addItem(value);
+    combo.setSelectedItem(value);
+}
+
+
+// Loads the selected JTable record into the enrollment form.
+private void loadSelectedEnrollmentIntoForm() {
+
+    int selectedRow = jTable4.getSelectedRow();
+
+    if (selectedRow == -1) {
+        return;
+    }
+
+    int row = jTable4.convertRowIndexToModel(selectedRow);
+
+    String studentId =
+            jTable4.getValueAt(row, 1).toString();
+
+    String studentName =
+            jTable4.getValueAt(row, 2).toString();
+
+    String subject =
+            jTable4.getValueAt(row, 3).toString();
+
+    String academicYear =
+            jTable4.getValueAt(row, 4).toString();
+
+    String semester =
+            jTable4.getValueAt(row, 5).toString();
+
+    String enrollmentDate =
+            jTable4.getValueAt(row, 6).toString();
+
+    String status =
+            jTable4.getValueAt(row, 7).toString();
+
+    // Populate Student.
+    selectComboItem(
+        cmbStudent,
+        studentId + " - " + studentName
+    );
+
+    // Populate Subject.
+    selectComboItem(cmbSubject, subject);
+
+    // Populate Academic Year.
+    selectComboItem(cmbAcademicYear, academicYear);
+
+    // Populate Semester.
+    selectComboItem(cmbSemester, semester);
+
+    // Populate Status.
+    selectComboItem(cmbStatus, status);
+
+    // Convert the database date into MM/DD/YYYY.
+    try {
+
+        LocalDate date = LocalDate.parse(
+            enrollmentDate.substring(0, 10)
+        );
+
+        txtEnrollmentDate.setText(
+            date.format(
+                DateTimeFormatter.ofPattern("MM/dd/yyyy")
+            )
+        );
+
+    } catch (Exception ex) {
+
+        txtEnrollmentDate.setText(enrollmentDate);
+    }
+}
+    // Sets the default options of the enrollment form.
+private void initializeEnrollmentControls() {
+
+    // Get the current year.
+    int currentYear = LocalDate.now().getYear();
+
+    // Academic year options.
+    cmbAcademicYear.removeAllItems();
+
+    for (int i = 0; i < 3; i++) {
+        int startYear = currentYear + i;
+
+        cmbAcademicYear.addItem(
+            startYear + "-" + (startYear + 1)
+        );
+    }
+
+    // Semester options.
+    cmbSemester.removeAllItems();
+    cmbSemester.addItem("First Semester");
+    cmbSemester.addItem("Second Semester");
+    cmbSemester.addItem("Summer");
+
+    // Enrollment status options.
+    cmbStatus.removeAllItems();
+    cmbStatus.addItem("Pending");
+    cmbStatus.addItem("Enrolled");
+    cmbStatus.addItem("Dropped");
+
+    // Default enrollment date.
+    txtEnrollmentDate.setText(
+        LocalDate.now().format(
+            DateTimeFormatter.ofPattern("MM/dd/yyyy")
+        )
+    );
+
+    // Remove the sample combo box entries.
+    cmbStudent.removeAllItems();
+    cmbSubject.removeAllItems();
+
+    // Clear the search field.
+    txtSearchEnrollment.setText("");
 }
     private void showMainContent(String cardName) {
 
@@ -467,6 +616,29 @@ private void filterSubjects() {
         jScrollPane3 = new javax.swing.JScrollPane();
         jTable3 = new javax.swing.JTable();
         Enrollments = new javax.swing.JPanel();
+        jLabel23 = new javax.swing.JLabel();
+        jLabel24 = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
+        jLabel26 = new javax.swing.JLabel();
+        cmbSubject = new javax.swing.JComboBox<>();
+        jLabel27 = new javax.swing.JLabel();
+        cmbStudent = new javax.swing.JComboBox<>();
+        jLabel28 = new javax.swing.JLabel();
+        jLabel29 = new javax.swing.JLabel();
+        cmbSemester = new javax.swing.JComboBox<>();
+        cmbAcademicYear = new javax.swing.JComboBox<>();
+        jLabel30 = new javax.swing.JLabel();
+        jLabel31 = new javax.swing.JLabel();
+        cmbStatus = new javax.swing.JComboBox<>();
+        txtEnrollmentDate = new javax.swing.JTextField();
+        btnAddEnrollment = new javax.swing.JButton();
+        btnClearEnrollment = new javax.swing.JButton();
+        jLabel32 = new javax.swing.JLabel();
+        txtSearchEnrollment = new javax.swing.JTextField();
+        btnSearchEnrollment = new javax.swing.JButton();
+        tblEnrollments = new javax.swing.JScrollPane();
+        jTable4 = new javax.swing.JTable();
+        btnUpdateEnrollment = new javax.swing.JButton();
         Grades = new javax.swing.JPanel();
         Reports = new javax.swing.JPanel();
         AddStudentForm = new javax.swing.JPanel();
@@ -837,15 +1009,185 @@ private void filterSubjects() {
 
         MainContentPanel.add(Subjects, "card3");
 
+        jLabel23.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jLabel23.setText("Enrollment Management");
+
+        jLabel24.setText("Manage student subject registrations and enrollment records.");
+
+        jLabel25.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel25.setText("New Enrollment");
+
+        jLabel26.setText("Student");
+
+        cmbSubject.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbSubject.addActionListener(this::cmbSubjectActionPerformed);
+
+        jLabel27.setText("Subject");
+
+        cmbStudent.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbStudent.addActionListener(this::cmbStudentActionPerformed);
+
+        jLabel28.setText("Academic year");
+
+        jLabel29.setText("Semester");
+
+        cmbSemester.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbSemester.addActionListener(this::cmbSemesterActionPerformed);
+
+        cmbAcademicYear.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbAcademicYear.addActionListener(this::cmbAcademicYearActionPerformed);
+
+        jLabel30.setText("Enrollment Date");
+
+        jLabel31.setText("Status");
+
+        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbStatus.addActionListener(this::cmbStatusActionPerformed);
+
+        txtEnrollmentDate.setText("MM/DD/YY");
+        txtEnrollmentDate.addActionListener(this::txtEnrollmentDateActionPerformed);
+
+        btnAddEnrollment.setText("+ Add Enrollment");
+        btnAddEnrollment.addActionListener(this::btnAddEnrollmentActionPerformed);
+
+        btnClearEnrollment.setText("Clear");
+        btnClearEnrollment.addActionListener(this::btnClearEnrollmentActionPerformed);
+
+        jLabel32.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel32.setText("Enrollment Records");
+
+        txtSearchEnrollment.setText("Search Enrollments");
+        txtSearchEnrollment.addActionListener(this::txtSearchEnrollmentActionPerformed);
+
+        btnSearchEnrollment.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
+        btnSearchEnrollment.setText("Search");
+        btnSearchEnrollment.addActionListener(this::btnSearchEnrollmentActionPerformed);
+
+        tblEnrollments.setFont(new java.awt.Font("Segoe UI", 0, 8)); // NOI18N
+
+        jTable4.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "Enrollment ID", "Student ID", "Student Name", "Subject", "Academic Year", "Semester", "Enrollment Date", "Status"
+            }
+        ));
+        jTable4.setName(""); // NOI18N
+        tblEnrollments.setViewportView(jTable4);
+
+        btnUpdateEnrollment.setText("Update");
+        btnUpdateEnrollment.addActionListener(this::btnUpdateEnrollmentActionPerformed);
+
         javax.swing.GroupLayout EnrollmentsLayout = new javax.swing.GroupLayout(Enrollments);
         Enrollments.setLayout(EnrollmentsLayout);
         EnrollmentsLayout.setHorizontalGroup(
             EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 600, Short.MAX_VALUE)
+            .addGroup(EnrollmentsLayout.createSequentialGroup()
+                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(tblEnrollments, javax.swing.GroupLayout.PREFERRED_SIZE, 573, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(EnrollmentsLayout.createSequentialGroup()
+                            .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(EnrollmentsLayout.createSequentialGroup()
+                                    .addGap(21, 21, 21)
+                                    .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(cmbStudent, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jLabel26)
+                                        .addComponent(jLabel28)))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, EnrollmentsLayout.createSequentialGroup()
+                                    .addContainerGap()
+                                    .addComponent(cmbAcademicYear, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGap(18, 18, 18)
+                            .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel27)
+                                .addComponent(cmbSubject, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel29)
+                                .addComponent(cmbSemester, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(EnrollmentsLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jLabel32)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(btnUpdateEnrollment)
+                                .addGap(172, 172, 172)
+                                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(btnClearEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnSearchEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtSearchEnrollment)
+                                    .addComponent(btnAddEnrollment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, EnrollmentsLayout.createSequentialGroup()
+                                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(EnrollmentsLayout.createSequentialGroup()
+                                        .addGap(21, 21, 21)
+                                        .addComponent(jLabel30)
+                                        .addGap(203, 203, 203))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, EnrollmentsLayout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addComponent(txtEnrollmentDate, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)))
+                                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel31)
+                                    .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGroup(EnrollmentsLayout.createSequentialGroup()
+                            .addContainerGap()
+                            .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel25)
+                                .addComponent(jLabel24)))))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
         EnrollmentsLayout.setVerticalGroup(
             EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 497, Short.MAX_VALUE)
+            .addGroup(EnrollmentsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel24)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel25)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel26)
+                    .addComponent(jLabel27))
+                .addGap(3, 3, 3)
+                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbStudent, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbSubject, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel28)
+                    .addComponent(jLabel29))
+                .addGap(6, 6, 6)
+                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbAcademicYear, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbSemester, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel30)
+                    .addComponent(jLabel31))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtEnrollmentDate, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnAddEnrollment)
+                    .addComponent(btnClearEnrollment))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtSearchEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel32)
+                    .addComponent(btnSearchEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnUpdateEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(tblEnrollments, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         MainContentPanel.add(Enrollments, "card6");
@@ -1323,6 +1665,8 @@ worker.execute();
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
         // TODO add your handling code here:
             showMainContent("card6");
+            loadEnrollmentOptions();
+            loadEnrollments();
     }//GEN-LAST:event_jButton8ActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
@@ -1619,6 +1963,406 @@ worker.execute();
         showMainContent("card8");
     }//GEN-LAST:event_jButton12ActionPerformed
 
+    private void cmbSubjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbSubjectActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbSubjectActionPerformed
+
+    private void cmbStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbStudentActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbStudentActionPerformed
+
+    private void cmbSemesterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbSemesterActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbSemesterActionPerformed
+
+    private void cmbAcademicYearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbAcademicYearActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbAcademicYearActionPerformed
+
+    private void cmbStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbStatusActionPerformed
+        // TODO add your handling code here:
+        cmbStatus.requestFocusInWindow();
+    }//GEN-LAST:event_cmbStatusActionPerformed
+
+    private void txtEnrollmentDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtEnrollmentDateActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtEnrollmentDateActionPerformed
+
+    private void btnAddEnrollmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddEnrollmentActionPerformed
+// Get selected student.
+    if (cmbStudent.getSelectedItem() == null
+            || cmbSubject.getSelectedItem() == null
+            || cmbAcademicYear.getSelectedItem() == null
+            || cmbSemester.getSelectedItem() == null
+            || cmbStatus.getSelectedItem() == null) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Please load and select all enrollment information.",
+            "Missing Information",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        return;
+    }
+
+    String selectedStudent =
+            cmbStudent.getSelectedItem().toString();
+
+    // Extract the Student ID from the ComboBox.
+    int separator = selectedStudent.indexOf(" - ");
+
+    if (separator < 1) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Invalid student selection.",
+            "Enrollment Error",
+            JOptionPane.ERROR_MESSAGE
+        );
+
+        return;
+    }
+
+    String studentIdText =
+            selectedStudent.substring(0, separator);
+
+    String subject =
+            cmbSubject.getSelectedItem().toString();
+
+    String academicYear =
+            cmbAcademicYear.getSelectedItem().toString();
+
+    String semester =
+            cmbSemester.getSelectedItem().toString();
+
+    String status =
+            cmbStatus.getSelectedItem().toString();
+
+    String dateText =
+            txtEnrollmentDate.getText().trim();
+
+    // Validate the date.
+    LocalDate enrollmentDate;
+
+    try {
+
+        enrollmentDate = LocalDate.parse(
+            dateText,
+            DateTimeFormatter.ofPattern("MM/dd/uuuu")
+        );
+
+    } catch (Exception ex) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Invalid date format.\nPlease use MM/DD/YYYY.",
+            "Invalid Date",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        txtEnrollmentDate.requestFocus();
+        return;
+    }
+
+    // Prevent duplicate enrollment for the same subject and semester.
+    for (Object[] row : enrollmentRows) {
+
+        boolean sameStudent =
+                String.valueOf(row[1]).equals(studentIdText);
+
+        boolean sameSubject =
+                String.valueOf(row[3]).equalsIgnoreCase(subject);
+
+        boolean sameYear =
+                String.valueOf(row[4]).equals(academicYear);
+
+        boolean sameSemester =
+                String.valueOf(row[5]).equals(semester);
+
+        boolean notDropped =
+                !String.valueOf(row[7]).equalsIgnoreCase("Dropped");
+
+        if (sameStudent && sameSubject
+                && sameYear && sameSemester && notDropped) {
+
+            JOptionPane.showMessageDialog(
+                this,
+                "This student is already enrolled in this subject "
+                + "for the selected academic year and semester.",
+                "Duplicate Enrollment",
+                JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+    }
+
+    // Create JSON request body.
+    JsonObject enrollment = new JsonObject();
+
+    try {
+        enrollment.addProperty(
+            "student_id",
+            Integer.parseInt(studentIdText)
+        );
+    } catch (NumberFormatException ex) {
+        JOptionPane.showMessageDialog(
+            this,
+            "Invalid Student ID.",
+            "Enrollment Error",
+            JOptionPane.ERROR_MESSAGE
+        );
+        return;
+    }
+
+    enrollment.addProperty("subject", subject);
+    enrollment.addProperty("academic_year", academicYear);
+    enrollment.addProperty("semester", semester);
+    enrollment.addProperty(
+        "enrollment_date",
+        enrollmentDate.toString()
+    );
+    enrollment.addProperty("status", status);
+
+    // Disable button while saving.
+    btnAddEnrollment.setEnabled(false);
+    btnAddEnrollment.setText("Saving...");
+
+    SwingWorker<String, Void> worker =
+            new SwingWorker<String, Void>() {
+
+        @Override
+        protected String doInBackground() throws Exception {
+
+            return SupabaseClient.post(
+                "/rest/v1/enrollments",
+                enrollment
+            );
+        }
+
+        @Override
+        protected void done() {
+
+            btnAddEnrollment.setEnabled(true);
+            btnAddEnrollment.setText("+ Add Enrollment");
+
+            try {
+
+                get();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Enrollment successfully added!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+
+                // Clear the form.
+                clearEnrollmentForm();
+
+                // Refresh enrollment records.
+                loadEnrollments();
+
+                // Update dashboard counts.
+                updateDashboardCounts();
+
+            } catch (Exception ex) {
+
+                Throwable cause = ex.getCause() == null
+                        ? ex : ex.getCause();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Unable to save enrollment:\n"
+                    + cause.getMessage(),
+                    "Save Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    };
+
+    worker.execute();        // TODO add your handling code here:
+    }//GEN-LAST:event_btnAddEnrollmentActionPerformed
+
+    private void btnClearEnrollmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearEnrollmentActionPerformed
+    clearEnrollmentForm();
+    }//GEN-LAST:event_btnClearEnrollmentActionPerformed
+
+    private void btnSearchEnrollmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchEnrollmentActionPerformed
+    filterEnrollmentRecords();
+    }//GEN-LAST:event_btnSearchEnrollmentActionPerformed
+
+    private void txtSearchEnrollmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchEnrollmentActionPerformed
+    filterEnrollmentRecords();
+    }//GEN-LAST:event_txtSearchEnrollmentActionPerformed
+
+    private void btnUpdateEnrollmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateEnrollmentActionPerformed
+
+    // Check whether a record is selected.
+    int selectedRow = jTable4.getSelectedRow();
+
+    if (selectedRow == -1) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Please select an enrollment record from the table.",
+            "No Record Selected",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        return;
+    }
+
+    // Get the actual database ID.
+    int modelRow = jTable4.convertRowIndexToModel(selectedRow);
+
+    long enrollmentId = Long.parseLong(
+        jTable4.getModel().getValueAt(modelRow, 0).toString()
+    );
+
+    // Get values from the form.
+    String selectedStudent =
+            cmbStudent.getSelectedItem().toString();
+
+    String studentIdText =
+            selectedStudent.substring(
+                0, selectedStudent.indexOf(" - ")
+            );
+
+    String subject = cmbSubject.getSelectedItem().toString();
+
+    String academicYear =
+            cmbAcademicYear.getSelectedItem().toString();
+
+    String semester =
+            cmbSemester.getSelectedItem().toString();
+
+    String status = cmbStatus.getSelectedItem().toString();
+
+    String dateText = txtEnrollmentDate.getText().trim();
+
+    // Validate Student ID.
+    int studentId;
+
+    try {
+
+        studentId = Integer.parseInt(studentIdText);
+
+    } catch (NumberFormatException ex) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Invalid Student ID.",
+            "Validation Error",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        return;
+    }
+
+    // Validate enrollment date.
+    LocalDate enrollmentDate;
+
+    try {
+
+        enrollmentDate = LocalDate.parse(
+            dateText,
+            DateTimeFormatter.ofPattern("MM/dd/uuuu")
+        );
+
+    } catch (Exception ex) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Please enter a valid date using MM/DD/YYYY.",
+            "Invalid Date",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        txtEnrollmentDate.requestFocus();
+        return;
+    }
+
+    // Create JSON request for the Supabase function.
+    JsonObject update = new JsonObject();
+
+    update.addProperty("p_enrollment_id", enrollmentId);
+    update.addProperty("p_student_id", studentId);
+    update.addProperty("p_subject", subject);
+    update.addProperty("p_academic_year", academicYear);
+    update.addProperty("p_semester", semester);
+    update.addProperty(
+        "p_enrollment_date",
+        enrollmentDate.toString()
+    );
+    update.addProperty("p_status", status);
+
+    // Disable the button while updating.
+    btnUpdateEnrollment.setEnabled(false);
+    btnUpdateEnrollment.setText("Updating...");
+
+    SwingWorker<String, Void> worker =
+            new SwingWorker<String, Void>() {
+
+        @Override
+        protected String doInBackground() throws Exception {
+
+            return SupabaseClient.post(
+                "/rest/v1/rpc/update_enrollment",
+                update
+            );
+        }
+
+        @Override
+        protected void done() {
+
+            btnUpdateEnrollment.setEnabled(true);
+            btnUpdateEnrollment.setText("Update");
+
+            try {
+
+                get();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Enrollment record successfully updated!",
+                    "Update Successful",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+
+                // Clear the form.
+                clearEnrollmentForm();
+
+                // Remove the selected row.
+                jTable4.clearSelection();
+
+                // Reload the enrollment records.
+                loadEnrollments();
+
+                // Refresh dashboard totals.
+                updateDashboardCounts();
+
+            } catch (Exception ex) {
+
+                Throwable cause = ex.getCause() == null
+                        ? ex : ex.getCause();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Unable to update enrollment:\n"
+                    + cause.getMessage(),
+                    "Update Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    };
+
+    worker.execute();
+    }//GEN-LAST:event_btnUpdateEnrollmentActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1657,6 +2401,15 @@ worker.execute();
     private javax.swing.JPanel SignUpPage;
     private javax.swing.JPanel Students;
     private javax.swing.JPanel Subjects;
+    private javax.swing.JButton btnAddEnrollment;
+    private javax.swing.JButton btnClearEnrollment;
+    private javax.swing.JButton btnSearchEnrollment;
+    private javax.swing.JButton btnUpdateEnrollment;
+    private javax.swing.JComboBox<String> cmbAcademicYear;
+    private javax.swing.JComboBox<String> cmbSemester;
+    private javax.swing.JComboBox<String> cmbStatus;
+    private javax.swing.JComboBox<String> cmbStudent;
+    private javax.swing.JComboBox<String> cmbSubject;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton11;
@@ -1695,7 +2448,17 @@ worker.execute();
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -1710,6 +2473,7 @@ worker.execute();
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
     private javax.swing.JTable jTable3;
+    private javax.swing.JTable jTable4;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
@@ -1719,6 +2483,9 @@ worker.execute();
     private javax.swing.JTextField jTextField7;
     private javax.swing.JTextField jTextField8;
     private javax.swing.JTextField jTextField9;
+    private javax.swing.JScrollPane tblEnrollments;
+    private javax.swing.JTextField txtEnrollmentDate;
+    private javax.swing.JTextField txtSearchEnrollment;
     // End of variables declaration//GEN-END:variables
 private void showDashboard(String email, String role) {
 
@@ -1736,5 +2503,290 @@ private void showDashboard(String email, String role) {
     loadRecentStudents();
 
     loadStudents("");
+}
+// Loads students and subjects into the enrollment form.
+private void loadEnrollmentOptions() {
+
+    SwingWorker<String[][], Void> worker =
+            new SwingWorker<String[][], Void>() {
+
+        @Override
+        protected String[][] doInBackground() throws Exception {
+
+            // Load students.
+            String studentResponse = SupabaseClient.get(
+                "/rest/v1/students?select=id,first_name,last_name&order=id.asc"
+            );
+
+            JsonArray students =
+                    JsonParser.parseString(studentResponse).getAsJsonArray();
+
+            List<String> studentOptions = new ArrayList<>();
+
+            for (int i = 0; i < students.size(); i++) {
+
+                JsonObject student = students.get(i).getAsJsonObject();
+
+                String id = student.get("id").getAsString();
+                String firstName = student.get("first_name").getAsString();
+                String lastName = student.get("last_name").getAsString();
+
+                String displayName =
+                        id + " - " + firstName + " " + lastName;
+
+                studentOptions.add(displayName);
+            }
+
+            // Load subjects.
+            String subjectResponse = SupabaseClient.get(
+                "/rest/v1/subjects?select=name&order=name.asc"
+            );
+
+            JsonArray subjects =
+                    JsonParser.parseString(subjectResponse).getAsJsonArray();
+
+            List<String> subjectOptions = new ArrayList<>();
+
+            for (int i = 0; i < subjects.size(); i++) {
+
+                JsonObject subject = subjects.get(i).getAsJsonObject();
+
+                subjectOptions.add(
+                    subject.get("name").getAsString()
+                );
+            }
+
+            return new String[][] {
+                studentOptions.toArray(new String[0]),
+                subjectOptions.toArray(new String[0])
+            };
+        }
+
+        @Override
+        protected void done() {
+
+            try {
+
+                String[][] options = get();
+
+                // Populate student ComboBox.
+                cmbStudent.removeAllItems();
+
+                for (String student : options[0]) {
+                    cmbStudent.addItem(student);
+                }
+
+                // Populate subject ComboBox.
+                cmbSubject.removeAllItems();
+
+                for (String subject : options[1]) {
+                    cmbSubject.addItem(subject);
+                }
+
+                if (cmbStudent.getItemCount() > 0) {
+                    cmbStudent.setSelectedIndex(0);
+                }
+
+                if (cmbSubject.getItemCount() > 0) {
+                    cmbSubject.setSelectedIndex(0);
+                }
+
+            } catch (Exception ex) {
+
+                Throwable cause = ex.getCause() == null
+                        ? ex : ex.getCause();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Unable to load enrollment options:\n"
+                    + cause.getMessage(),
+                    "Enrollment Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    };
+
+    worker.execute();
+}
+// Loads enrollment records from Supabase into jTable4.
+private void loadEnrollments() {
+
+    SwingWorker<List<Object[]>, Void> worker =
+            new SwingWorker<List<Object[]>, Void>() {
+
+        @Override
+        protected List<Object[]> doInBackground() throws Exception {
+
+            // Load student names for displaying alongside student IDs.
+            String studentResponse = SupabaseClient.get(
+                "/rest/v1/students?select=id,first_name,last_name"
+            );
+
+            JsonArray students =
+                    JsonParser.parseString(studentResponse).getAsJsonArray();
+
+            Map<String, String> studentNames = new HashMap<>();
+
+            for (int i = 0; i < students.size(); i++) {
+
+                JsonObject student = students.get(i).getAsJsonObject();
+
+                String id = student.get("id").getAsString();
+
+                String fullName =
+                        student.get("first_name").getAsString()
+                        + " "
+                        + student.get("last_name").getAsString();
+
+                studentNames.put(id, fullName);
+            }
+
+            // Retrieve enrollment records.
+            String response = SupabaseClient.get(
+    "/rest/v1/enrollments?select=id,student_id,subject,academic_year,semester,enrollment_date,status&order=id.asc"
+);
+
+            JsonArray enrollments =
+                    JsonParser.parseString(response).getAsJsonArray();
+
+            List<Object[]> rows = new ArrayList<>();
+
+            for (int i = 0; i < enrollments.size(); i++) {
+
+                JsonObject enrollment =
+                        enrollments.get(i).getAsJsonObject();
+
+                String studentId =
+                        enrollment.get("student_id").getAsString();
+
+                String studentName =
+                        studentNames.getOrDefault(studentId, "Unknown Student");
+
+                rows.add(new Object[]{
+
+    enrollment.get("id").getAsLong(),
+
+    studentId,
+
+    studentName,
+
+    enrollment.get("subject").getAsString(),
+
+    enrollment.get("academic_year").getAsString(),
+
+    enrollment.get("semester").getAsString(),
+
+    enrollment.get("enrollment_date").getAsString(),
+
+    enrollment.get("status").getAsString()
+
+});
+            }
+
+            return rows;
+        }
+
+        @Override
+        protected void done() {
+
+            try {
+
+                enrollmentRows.clear();
+                enrollmentRows.addAll(get());
+
+                filterEnrollmentRecords();
+
+            } catch (Exception ex) {
+
+                Throwable cause = ex.getCause() == null
+                        ? ex : ex.getCause();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Unable to load enrollment records:\n"
+                    + cause.getMessage(),
+                    "Enrollment Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    };
+
+    worker.execute();
+}
+// Filters enrollment records displayed in jTable4.
+private void filterEnrollmentRecords() {
+
+    String search = txtSearchEnrollment.getText()
+            .trim()
+            .toLowerCase();
+
+    DefaultTableModel model = new DefaultTableModel(
+        new String[]{
+            "Enrollment ID",
+            "Student ID",
+            "Student Name",
+            "Subject",
+            "Academic Year",
+            "Semester",
+            "Enrollment Date",
+            "Status"
+        },
+        0
+    ) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+
+    for (Object[] row : enrollmentRows) {
+
+        String searchableText = "";
+
+        for (Object value : row) {
+            searchableText += String.valueOf(value) + " ";
+        }
+
+        if (search.isEmpty()
+                || searchableText.toLowerCase().contains(search)) {
+
+            model.addRow(row);
+        }
+    }
+
+    jTable4.setModel(model);
+}
+// Clears enrollment form fields and restores defaults.
+private void clearEnrollmentForm() {
+
+    if (cmbStudent.getItemCount() > 0) {
+        cmbStudent.setSelectedIndex(0);
+    }
+
+    if (cmbSubject.getItemCount() > 0) {
+        cmbSubject.setSelectedIndex(0);
+    }
+
+    if (cmbAcademicYear.getItemCount() > 0) {
+        cmbAcademicYear.setSelectedIndex(0);
+    }
+
+    if (cmbSemester.getItemCount() > 0) {
+        cmbSemester.setSelectedIndex(0);
+    }
+
+    if (cmbStatus.getItemCount() > 0) {
+        cmbStatus.setSelectedIndex(0);
+    }
+
+    txtEnrollmentDate.setText(
+        LocalDate.now().format(
+            DateTimeFormatter.ofPattern("MM/dd/yyyy")
+        )
+    );
+
+    txtSearchEnrollment.setText("");
 }
 }
