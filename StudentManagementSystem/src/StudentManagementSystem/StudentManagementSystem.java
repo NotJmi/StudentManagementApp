@@ -34,6 +34,8 @@ public class StudentManagementSystem extends javax.swing.JFrame {
     // Stores enrollment records currently loaded from Supabase.
     private final List<Object[]> enrollmentRows = new ArrayList<>();
 
+    private GradesPanel gradesPanel;
+
     public StudentManagementSystem() {
     initComponents();
     
@@ -48,6 +50,12 @@ public class StudentManagementSystem extends javax.swing.JFrame {
     
     initializeEnrollmentControls();
 
+
+    // Grades module (card4): replaces the empty NetBeans placeholder panel.
+    gradesPanel = new GradesPanel(this::updateDashboardCounts);
+    Grades.removeAll();
+    Grades.setLayout(new BorderLayout());
+    Grades.add(gradesPanel, BorderLayout.CENTER);
 
     CardLayout cl = (CardLayout) getContentPane().getLayout();
     cl.first(getContentPane());
@@ -1651,6 +1659,7 @@ worker.execute();
     private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
         // TODO add your handling code here:
             showMainContent("card4");
+            gradesPanel.refresh();
     }//GEN-LAST:event_jButton9ActionPerformed
 
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
