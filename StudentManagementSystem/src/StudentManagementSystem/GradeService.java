@@ -16,6 +16,10 @@ public final class GradeService {
 
     public static final double PASSING_SCORE = 75.0;
 
+    static List<GradeRecord> fetchRecords(List<Student> students) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
     private GradeService(){
     }
 
