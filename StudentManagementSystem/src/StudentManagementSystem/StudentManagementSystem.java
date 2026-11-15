@@ -21,6 +21,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import javax.swing.JFileChooser;
+import java.net.URLEncoder;
 /**
  *
  * @author jamesandrewwalker
@@ -30,14 +36,30 @@ public class StudentManagementSystem extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(StudentManagementSystem.class.getName());
 
     private final List<String> subjectNames = new ArrayList<>();
+    // Stores the grade records loaded from Supabase.
+    private final List<Object[]> gradeRows = new ArrayList<>();
+
+// Prevents unnecessary dropdown events while loading students.
+    private boolean loadingGradeStudents = false;
     
     // Stores enrollment records currently loaded from Supabase.
     private final List<Object[]> enrollmentRows = new ArrayList<>();
 
-    private GradesPanel gradesPanel;
+    // Stores the generated report information.
+    private static class ReportData {
+    
+    int totalStudents;
+    int totalEnrollments;
+    int totalGrades;
+    int pendingGrades;
+
+    List<Object[]> rows = new ArrayList<>();
+}
+    
 
     public StudentManagementSystem() {
     initComponents();
+    
     
     jTable4.getSelectionModel().addListSelectionListener(e -> {
 
@@ -49,13 +71,14 @@ public class StudentManagementSystem extends javax.swing.JFrame {
     
     
     initializeEnrollmentControls();
+    jComboBox2.addActionListener(e -> {
+    if (!loadingGradeStudents) {
+        loadGradeSubjects();
+    }
+});
 
 
-    // Grades module (card4): replaces the empty NetBeans placeholder panel.
-    gradesPanel = new GradesPanel(this::updateDashboardCounts);
-    Grades.removeAll();
-    Grades.setLayout(new BorderLayout());
-    Grades.add(gradesPanel, BorderLayout.CENTER);
+ 
 
     CardLayout cl = (CardLayout) getContentPane().getLayout();
     cl.first(getContentPane());
@@ -640,6 +663,22 @@ private void filterSubjects() {
         jTable4 = new javax.swing.JTable();
         btnUpdateEnrollment = new javax.swing.JButton();
         Grades = new javax.swing.JPanel();
+        jLabel40 = new javax.swing.JLabel();
+        jLabel41 = new javax.swing.JLabel();
+        jLabel42 = new javax.swing.JLabel();
+        jLabel43 = new javax.swing.JLabel();
+        jComboBox2 = new javax.swing.JComboBox<>();
+        jLabel44 = new javax.swing.JLabel();
+        jComboBox3 = new javax.swing.JComboBox<>();
+        jLabel45 = new javax.swing.JLabel();
+        jTextField11 = new javax.swing.JTextField();
+        jButton25 = new javax.swing.JButton();
+        jLabel46 = new javax.swing.JLabel();
+        jTextField12 = new javax.swing.JTextField();
+        jButton26 = new javax.swing.JButton();
+        jButton27 = new javax.swing.JButton();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        jTable6 = new javax.swing.JTable();
         Reports = new javax.swing.JPanel();
         jLabel33 = new javax.swing.JLabel();
         jLabel34 = new javax.swing.JLabel();
@@ -850,10 +889,10 @@ private void filterSubjects() {
                                 .addGroup(SideDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel7))
-                                .addGap(115, 115, 115)
-                                .addGroup(SideDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel8)
-                                    .addComponent(jLabel6)))
+                                .addGap(104, 104, 104)
+                                .addGroup(SideDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel6)
+                                    .addComponent(jLabel8)))
                             .addGroup(SideDashboardLayout.createSequentialGroup()
                                 .addComponent(jButton12)
                                 .addGap(60, 60, 60)
@@ -862,8 +901,8 @@ private void filterSubjects() {
                                 .addComponent(jButton14))))
                     .addGroup(SideDashboardLayout.createSequentialGroup()
                         .addGap(15, 15, 15)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 538, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(47, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 585, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(36, Short.MAX_VALUE))
         );
         SideDashboardLayout.setVerticalGroup(
             SideDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -872,22 +911,22 @@ private void filterSubjects() {
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel4)
-                .addGap(77, 77, 77)
+                .addGap(18, 18, 18)
                 .addGroup(SideDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6))
-                .addGap(54, 54, 54)
+                .addGap(70, 70, 70)
                 .addGroup(SideDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(jLabel8))
-                .addGap(53, 53, 53)
+                .addGap(29, 29, 29)
                 .addGroup(SideDashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton12)
                     .addComponent(jButton13)
                     .addComponent(jButton14))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
         MainContentPanel.add(SideDashboard, "card7");
@@ -935,7 +974,7 @@ private void filterSubjects() {
                                 .addComponent(jButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButton15)))
-                        .addGap(0, 30, Short.MAX_VALUE)))
+                        .addGap(0, 66, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         StudentsLayout.setVerticalGroup(
@@ -951,9 +990,9 @@ private void filterSubjects() {
                         .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jButton15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 26, Short.MAX_VALUE)
+                .addGap(18, 31, Short.MAX_VALUE)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(55, Short.MAX_VALUE))
+                .addContainerGap(53, Short.MAX_VALUE))
         );
 
         MainContentPanel.add(Students, "card2");
@@ -989,18 +1028,17 @@ private void filterSubjects() {
             SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(SubjectsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jScrollPane3)
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SubjectsLayout.createSequentialGroup()
-                            .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 322, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jButton20, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jButton19)))
+                .addGroup(SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(SubjectsLayout.createSequentialGroup()
+                        .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 322, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton20, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton19))
                     .addComponent(jLabel17)
-                    .addComponent(jLabel18))
-                .addContainerGap(40, Short.MAX_VALUE))
+                    .addComponent(jLabel18)
+                    .addComponent(jScrollPane3))
+                .addContainerGap(76, Short.MAX_VALUE))
         );
         SubjectsLayout.setVerticalGroup(
             SubjectsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1015,7 +1053,7 @@ private void filterSubjects() {
                     .addComponent(jTextField8)
                     .addComponent(jButton19, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 353, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 356, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1099,60 +1137,57 @@ private void filterSubjects() {
         EnrollmentsLayout.setHorizontalGroup(
             EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(EnrollmentsLayout.createSequentialGroup()
-                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(tblEnrollments, javax.swing.GroupLayout.PREFERRED_SIZE, 573, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(EnrollmentsLayout.createSequentialGroup()
-                            .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(EnrollmentsLayout.createSequentialGroup()
-                                    .addGap(21, 21, 21)
-                                    .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(cmbStudent, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jLabel26)
-                                        .addComponent(jLabel28)))
-                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, EnrollmentsLayout.createSequentialGroup()
-                                    .addContainerGap()
-                                    .addComponent(cmbAcademicYear, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGap(18, 18, 18)
-                            .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel27)
-                                .addComponent(cmbSubject, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel29)
-                                .addComponent(cmbSemester, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(EnrollmentsLayout.createSequentialGroup()
+                        .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(EnrollmentsLayout.createSequentialGroup()
+                                .addGap(21, 21, 21)
+                                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(cmbStudent, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel26)
+                                    .addComponent(jLabel28)))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, EnrollmentsLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(jLabel32)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(btnUpdateEnrollment)
-                                .addGap(172, 172, 172)
-                                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(btnClearEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(btnSearchEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(txtSearchEnrollment)
-                                    .addComponent(btnAddEnrollment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, EnrollmentsLayout.createSequentialGroup()
-                                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(cmbAcademicYear, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(18, 18, 18)
+                        .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel27)
+                            .addComponent(cmbSubject, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel29)
+                            .addComponent(cmbSemester, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel31)))
+                    .addGroup(EnrollmentsLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel25)
+                            .addComponent(jLabel24)))
+                    .addGroup(EnrollmentsLayout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(EnrollmentsLayout.createSequentialGroup()
+                                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addGroup(EnrollmentsLayout.createSequentialGroup()
-                                        .addGap(21, 21, 21)
-                                        .addComponent(jLabel30)
-                                        .addGap(203, 203, 203))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, EnrollmentsLayout.createSequentialGroup()
-                                        .addContainerGap()
-                                        .addComponent(txtEnrollmentDate, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(18, 18, 18)))
-                                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel31)
-                                    .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGroup(EnrollmentsLayout.createSequentialGroup()
-                            .addContainerGap()
-                            .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel25)
-                                .addComponent(jLabel24)))))
-                .addContainerGap(21, Short.MAX_VALUE))
+                                        .addComponent(jLabel32)
+                                        .addGap(28, 28, 28)
+                                        .addComponent(btnUpdateEnrollment)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(btnClearEnrollment))
+                                    .addComponent(btnSearchEnrollment))
+                                .addGap(18, 18, 18)
+                                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(btnAddEnrollment)
+                                    .addComponent(txtSearchEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jLabel30)
+                            .addGroup(EnrollmentsLayout.createSequentialGroup()
+                                .addComponent(txtEnrollmentDate, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, EnrollmentsLayout.createSequentialGroup()
+                .addGap(0, 22, Short.MAX_VALUE)
+                .addComponent(tblEnrollments, javax.swing.GroupLayout.PREFERRED_SIZE, 591, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(23, Short.MAX_VALUE))
         );
         EnrollmentsLayout.setVerticalGroup(
             EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1187,61 +1222,164 @@ private void filterSubjects() {
                 .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtEnrollmentDate, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(10, 10, 10)
-                .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnAddEnrollment)
-                    .addComponent(btnClearEnrollment))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnSearchEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtSearchEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel32)
-                        .addComponent(btnUpdateEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(EnrollmentsLayout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnAddEnrollment)
+                            .addComponent(btnClearEnrollment))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtSearchEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnSearchEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(EnrollmentsLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(EnrollmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel32)
+                            .addComponent(btnUpdateEnrollment, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(tblEnrollments, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         MainContentPanel.add(Enrollments, "card6");
+
+        jLabel40.setText("Grades Management");
+
+        jLabel41.setText("Record grades for enrolled subjects. Passing grade is 75.");
+
+        jLabel42.setText("Enter Grade");
+
+        jLabel43.setText("Student");
+
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jLabel44.setText("Subject");
+
+        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jLabel45.setText("Grade (0–100)");
+
+        jTextField11.addActionListener(this::jTextField11ActionPerformed);
+
+        jButton25.setText("Save Grade");
+        jButton25.addActionListener(this::jButton25ActionPerformed);
+
+        jLabel46.setText("Search");
+
+        jTextField12.addActionListener(this::jTextField12ActionPerformed);
+
+        jButton26.setText("Search");
+        jButton26.addActionListener(this::jButton26ActionPerformed);
+
+        jButton27.setText("Refresh");
+        jButton27.addActionListener(this::jButton27ActionPerformed);
+
+        jTable6.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
+            },
+            new String [] {
+                "Student ID", "Student Name", "Subject", "Grade", "Equivalent", "Remarks"
+            }
+        ));
+        jScrollPane5.setViewportView(jTable6);
 
         javax.swing.GroupLayout GradesLayout = new javax.swing.GroupLayout(Grades);
         Grades.setLayout(GradesLayout);
         GradesLayout.setHorizontalGroup(
             GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 600, Short.MAX_VALUE)
+            .addGroup(GradesLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel40)
+                    .addComponent(jLabel41)
+                    .addGroup(GradesLayout.createSequentialGroup()
+                        .addGap(25, 25, 25)
+                        .addGroup(GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(GradesLayout.createSequentialGroup()
+                                .addComponent(jLabel44)
+                                .addGap(49, 49, 49)
+                                .addGroup(GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jComboBox2, 0, 298, Short.MAX_VALUE)
+                                    .addComponent(jComboBox3, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 580, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel43)
+                            .addComponent(jLabel42)
+                            .addGroup(GradesLayout.createSequentialGroup()
+                                .addGroup(GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addGroup(GradesLayout.createSequentialGroup()
+                                        .addComponent(jLabel45)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jTextField11)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jButton25))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, GradesLayout.createSequentialGroup()
+                                        .addComponent(jLabel46)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jTextField12, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jButton26)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton27)))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         GradesLayout.setVerticalGroup(
             GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 497, Short.MAX_VALUE)
+            .addGroup(GradesLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel40)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel41)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel42)
+                .addGap(18, 18, 18)
+                .addGroup(GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel43)
+                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(21, 21, 21)
+                .addGroup(GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel44)
+                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel45)
+                    .addComponent(jTextField11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton25))
+                .addGap(36, 36, 36)
+                .addGroup(GradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel46)
+                    .addComponent(jTextField12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton26)
+                    .addComponent(jButton27))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(25, Short.MAX_VALUE))
         );
 
         MainContentPanel.add(Grades, "card4");
 
         jLabel33.setText("Academic Reports");
-        Reports.add(jLabel33);
 
         jLabel34.setText("View student performance and academic summaries.");
-        Reports.add(jLabel34);
 
         jLabel35.setText(" -Total Students");
-        Reports.add(jLabel35);
 
         jLabel36.setText(" -Enrollments");
-        Reports.add(jLabel36);
 
         jLabel37.setText(" -Grades Recorded");
-        Reports.add(jLabel37);
 
         jLabel38.setText(" -Pending Grades");
-        Reports.add(jLabel38);
 
         jLabel39.setText("Student Performance");
-        Reports.add(jLabel39);
-        Reports.add(jTextField10);
+
+        jTextField10.addActionListener(this::jTextField10ActionPerformed);
 
         jButton23.setText("Generate");
-        Reports.add(jButton23);
+        jButton23.addActionListener(this::jButton23ActionPerformed);
 
         jTable5.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -1256,11 +1394,75 @@ private void filterSubjects() {
         ));
         jScrollPane4.setViewportView(jTable5);
 
-        Reports.add(jScrollPane4);
-
         jButton24.setText("Export CSV");
         jButton24.addActionListener(this::jButton24ActionPerformed);
-        Reports.add(jButton24);
+
+        javax.swing.GroupLayout ReportsLayout = new javax.swing.GroupLayout(Reports);
+        Reports.setLayout(ReportsLayout);
+        ReportsLayout.setHorizontalGroup(
+            ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ReportsLayout.createSequentialGroup()
+                .addGroup(ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(ReportsLayout.createSequentialGroup()
+                        .addGap(30, 30, 30)
+                        .addGroup(ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, ReportsLayout.createSequentialGroup()
+                                .addComponent(jLabel39)
+                                .addGap(18, 18, 18)
+                                .addComponent(jTextField10))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, ReportsLayout.createSequentialGroup()
+                                .addGap(35, 35, 35)
+                                .addGroup(ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(ReportsLayout.createSequentialGroup()
+                                        .addComponent(jLabel35)
+                                        .addGap(258, 258, 258)
+                                        .addComponent(jLabel36))
+                                    .addGroup(ReportsLayout.createSequentialGroup()
+                                        .addComponent(jLabel37)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jLabel38)))))
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton23))
+                    .addGroup(ReportsLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel33)
+                            .addComponent(jLabel34))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(ReportsLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane4))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ReportsLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButton24)))
+                .addContainerGap())
+        );
+        ReportsLayout.setVerticalGroup(
+            ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ReportsLayout.createSequentialGroup()
+                .addGap(5, 5, 5)
+                .addComponent(jLabel33)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel34)
+                .addGap(26, 26, 26)
+                .addGroup(ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel35)
+                    .addComponent(jLabel36))
+                .addGap(36, 36, 36)
+                .addGroup(ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel37)
+                    .addComponent(jLabel38))
+                .addGap(45, 45, 45)
+                .addGroup(ReportsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel39)
+                    .addComponent(jTextField10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton23))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton24)
+                .addContainerGap())
+        );
 
         MainContentPanel.add(Reports, "card5");
 
@@ -1321,7 +1523,7 @@ private void filterSubjects() {
                                 .addComponent(jTextField4, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
                                 .addComponent(jTextField5)))
                         .addComponent(jButton18)))
-                .addContainerGap(291, Short.MAX_VALUE))
+                .addContainerGap(327, Short.MAX_VALUE))
         );
         AddStudentFormLayout.setVerticalGroup(
             AddStudentFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1390,7 +1592,7 @@ private void filterSubjects() {
                             .addComponent(jButton22))
                         .addComponent(jTextField9))
                     .addComponent(jLabel22))
-                .addContainerGap(322, Short.MAX_VALUE))
+                .addContainerGap(358, Short.MAX_VALUE))
         );
         AddNewSubjectFormLayout.setVerticalGroup(
             AddNewSubjectFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1409,7 +1611,7 @@ private void filterSubjects() {
                 .addGroup(AddNewSubjectFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton21, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton22, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(226, Short.MAX_VALUE))
+                .addContainerGap(229, Short.MAX_VALUE))
         );
 
         MainContentPanel.add(AddNewSubjectForm, "card9");
@@ -1434,8 +1636,8 @@ private void filterSubjects() {
                 .addContainerGap(711, Short.MAX_VALUE))
             .addGroup(DashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, DashboardLayout.createSequentialGroup()
-                    .addContainerGap(252, Short.MAX_VALUE)
-                    .addComponent(MainContentPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(216, Short.MAX_VALUE)
+                    .addComponent(MainContentPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 636, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addContainerGap()))
         );
         DashboardLayout.setVerticalGroup(
@@ -1458,8 +1660,9 @@ private void filterSubjects() {
                 .addGap(41, 41, 41))
             .addGroup(DashboardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(DashboardLayout.createSequentialGroup()
-                    .addComponent(MainContentPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 497, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 6, Short.MAX_VALUE)))
+                    .addContainerGap()
+                    .addComponent(MainContentPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 491, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
         getContentPane().add(Dashboard, "card4");
@@ -1700,12 +1903,15 @@ worker.execute();
     private void jButton10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton10ActionPerformed
         // TODO add your handling code here:
             showMainContent("card5");
+                generateReports();
+
     }//GEN-LAST:event_jButton10ActionPerformed
 
     private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
         // TODO add your handling code here:
             showMainContent("card4");
-            gradesPanel.refresh();
+            loadGradeStudents();
+            loadGrades();
     }//GEN-LAST:event_jButton9ActionPerformed
 
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
@@ -1876,6 +2082,8 @@ worker.execute();
 
     private void jButton14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton14ActionPerformed
         // TODO add your handling code here:
+        showMainContent("card5");
+        generateReports();
     }//GEN-LAST:event_jButton14ActionPerformed
 
     private void jTextField8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField8ActionPerformed
@@ -2410,7 +2618,45 @@ worker.execute();
     }//GEN-LAST:event_btnUpdateEnrollmentActionPerformed
     private void jButton24ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton24ActionPerformed
         // TODO add your handling code here:
+    exportReportsCSV();
     }//GEN-LAST:event_jButton24ActionPerformed
+
+    private void jButton23ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton23ActionPerformed
+        // TODO add your handling code here:
+            generateReports();
+    }//GEN-LAST:event_jButton23ActionPerformed
+
+    private void jTextField10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField10ActionPerformed
+        // TODO add your handling code here:
+            generateReports();
+    }//GEN-LAST:event_jTextField10ActionPerformed
+
+    private void jTextField11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField11ActionPerformed
+        // TODO add your handling code here:
+            saveGrade();
+    }//GEN-LAST:event_jTextField11ActionPerformed
+
+    private void jTextField12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField12ActionPerformed
+        // TODO add your handling code here:
+            filterGrades();
+    }//GEN-LAST:event_jTextField12ActionPerformed
+
+    private void jButton26ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton26ActionPerformed
+        // TODO add your handling code here:
+            filterGrades();
+    }//GEN-LAST:event_jButton26ActionPerformed
+
+    private void jButton27ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton27ActionPerformed
+        // TODO add your handling code here:
+        jTextField12.setText("");
+    loadGradeStudents();
+    loadGrades();
+    }//GEN-LAST:event_jButton27ActionPerformed
+
+    private void jButton25ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton25ActionPerformed
+        // TODO add your handling code here:
+            saveGrade();
+    }//GEN-LAST:event_jButton25ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -2476,6 +2722,9 @@ worker.execute();
     private javax.swing.JButton jButton22;
     private javax.swing.JButton jButton23;
     private javax.swing.JButton jButton24;
+    private javax.swing.JButton jButton25;
+    private javax.swing.JButton jButton26;
+    private javax.swing.JButton jButton27;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
@@ -2484,6 +2733,8 @@ worker.execute();
     private javax.swing.JButton jButton8;
     private javax.swing.JButton jButton9;
     private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JComboBox<String> jComboBox2;
+    private javax.swing.JComboBox<String> jComboBox3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -2518,6 +2769,13 @@ worker.execute();
     private javax.swing.JLabel jLabel38;
     private javax.swing.JLabel jLabel39;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel40;
+    private javax.swing.JLabel jLabel41;
+    private javax.swing.JLabel jLabel42;
+    private javax.swing.JLabel jLabel43;
+    private javax.swing.JLabel jLabel44;
+    private javax.swing.JLabel jLabel45;
+    private javax.swing.JLabel jLabel46;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -2529,13 +2787,17 @@ worker.execute();
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
     private javax.swing.JTable jTable3;
     private javax.swing.JTable jTable4;
     private javax.swing.JTable jTable5;
+    private javax.swing.JTable jTable6;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField10;
+    private javax.swing.JTextField jTextField11;
+    private javax.swing.JTextField jTextField12;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
@@ -2849,5 +3111,931 @@ private void clearEnrollmentForm() {
     );
 
     txtSearchEnrollment.setText("");
+}
+// ==========================================
+// LOAD STUDENTS FOR GRADES
+// ==========================================
+
+private void loadGradeStudents() {
+
+    loadingGradeStudents = true;
+    jComboBox2.removeAllItems();
+    jComboBox3.removeAllItems();
+
+    SwingWorker<Void, Void> worker =
+            new SwingWorker<Void, Void>() {
+
+        @Override
+        protected Void doInBackground() throws Exception {
+
+            String studentResponse = SupabaseClient.get(
+                "/rest/v1/students?select=id,first_name,last_name&order=id.asc"
+            );
+
+            JsonArray students =
+                    JsonParser.parseString(studentResponse).getAsJsonArray();
+
+            Map<Integer, String> studentNames = new HashMap<>();
+
+            for (int i = 0; i < students.size(); i++) {
+
+                JsonObject student = students.get(i).getAsJsonObject();
+
+                int id = student.get("id").getAsInt();
+
+                String name =
+                        student.get("first_name").getAsString()
+                        + " "
+                        + student.get("last_name").getAsString();
+
+                studentNames.put(id, name);
+            }
+
+            String enrollmentResponse = SupabaseClient.get(
+                "/rest/v1/enrollments?select=student_id,status"
+            );
+
+            JsonArray enrollments =
+                    JsonParser.parseString(enrollmentResponse).getAsJsonArray();
+
+            List<String> enrolledStudents = new ArrayList<>();
+
+            for (int i = 0; i < enrollments.size(); i++) {
+
+                JsonObject enrollment =
+                        enrollments.get(i).getAsJsonObject();
+
+                if (!enrollment.get("status").getAsString()
+                        .equalsIgnoreCase("Enrolled")) {
+                    continue;
+                }
+
+                int id = enrollment.get("student_id").getAsInt();
+
+                String name = studentNames.get(id);
+
+                if (name != null) {
+
+                    String item = id + " - " + name;
+
+                    if (!enrolledStudents.contains(item)) {
+                        enrolledStudents.add(item);
+                    }
+                }
+            }
+
+            javax.swing.SwingUtilities.invokeLater(() -> {
+
+                for (String student : enrolledStudents) {
+                    jComboBox2.addItem(student);
+                }
+
+                loadingGradeStudents = false;
+
+                if (jComboBox2.getItemCount() > 0) {
+                    loadGradeSubjects();
+                }
+            });
+
+            return null;
+        }
+
+        @Override
+        protected void done() {
+
+            try {
+                get();
+
+            } catch (Exception ex) {
+
+                loadingGradeStudents = false;
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Unable to load enrolled students:\n"
+                    + ex.getMessage(),
+                    "Grades Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    };
+
+    worker.execute();
+}
+// ==========================================
+// GENERATE ACADEMIC REPORTS
+// ==========================================
+
+private void generateReports() {
+
+    String search = jTextField10.getText()
+            .trim()
+            .toLowerCase();
+
+    jButton23.setEnabled(false);
+    jButton23.setText("Generating...");
+
+    SwingWorker<ReportData, Void> worker =
+            new SwingWorker<ReportData, Void>() {
+
+        @Override
+        protected ReportData doInBackground() throws Exception {
+
+            ReportData report = new ReportData();
+
+            // LOAD STUDENTS
+            String studentResponse = SupabaseClient.get(
+                "/rest/v1/students?select=id,first_name,last_name,course,year_level&order=id.asc"
+            );
+
+            JsonArray students =
+                    JsonParser.parseString(studentResponse)
+                            .getAsJsonArray();
+
+            // LOAD ENROLLMENTS
+            String enrollmentResponse = SupabaseClient.get(
+                "/rest/v1/enrollments?select=student_id,status"
+            );
+
+            JsonArray enrollments =
+                    JsonParser.parseString(enrollmentResponse)
+                            .getAsJsonArray();
+
+            // LOAD GRADES
+            String gradeResponse = SupabaseClient.get(
+                "/rest/v1/grades?select=student_id,subject,grade"
+            );
+
+            JsonArray grades =
+                    JsonParser.parseString(gradeResponse)
+                            .getAsJsonArray();
+
+
+            // SUMMARY COUNTS
+            report.totalStudents = students.size();
+            report.totalEnrollments = enrollments.size();
+            report.totalGrades = grades.size();
+
+            report.pendingGrades = Math.max(
+                0,
+                report.totalEnrollments - report.totalGrades
+            );
+
+
+            // COUNT ENROLLMENTS PER STUDENT
+            Map<Integer, Integer> enrollmentCounts =
+                    new HashMap<>();
+
+            for (int i = 0; i < enrollments.size(); i++) {
+
+                JsonObject enrollment =
+                        enrollments.get(i).getAsJsonObject();
+
+                int studentId =
+                        enrollment.get("student_id").getAsInt();
+
+                enrollmentCounts.put(
+                    studentId,
+                    enrollmentCounts.getOrDefault(studentId, 0) + 1
+                );
+            }
+
+
+            // COLLECT GRADES PER STUDENT
+            Map<Integer, List<Double>> studentGrades =
+                    new HashMap<>();
+
+            for (int i = 0; i < grades.size(); i++) {
+
+                JsonObject grade =
+                        grades.get(i).getAsJsonObject();
+
+                int studentId =
+                        grade.get("student_id").getAsInt();
+
+                double gradeValue =
+                        grade.get("grade").getAsDouble();
+
+                studentGrades
+                    .computeIfAbsent(
+                        studentId,
+                        key -> new ArrayList<>()
+                    )
+                    .add(gradeValue);
+            }
+
+
+            // GENERATE ONE REPORT ROW PER STUDENT
+            for (int i = 0; i < students.size(); i++) {
+
+                JsonObject student =
+                        students.get(i).getAsJsonObject();
+
+                int studentId =
+                        student.get("id").getAsInt();
+
+                String firstName =
+                        student.get("first_name").getAsString();
+
+                String lastName =
+                        student.get("last_name").getAsString();
+
+                String studentName =
+                        firstName + " " + lastName;
+
+                String course =
+                        student.get("course").getAsString();
+
+                String yearLevel =
+                        student.get("year_level").getAsString();
+
+
+                // Get enrollment count
+                int enrollmentCount =
+                        enrollmentCounts.getOrDefault(studentId, 0);
+
+
+                // Get student's grades
+                List<Double> gradesList =
+                        studentGrades.getOrDefault(
+                            studentId,
+                            new ArrayList<>()
+                        );
+
+                int gradesRecorded = gradesList.size();
+
+
+                // Calculate average grade
+                double average = 0;
+
+                if (gradesRecorded > 0) {
+
+                    double total = 0;
+
+                    for (double value : gradesList) {
+                        total += value;
+                    }
+
+                    average = total / gradesRecorded;
+                }
+
+
+                String averageText =
+                        gradesRecorded == 0
+                        ? "N/A"
+                        : String.format(
+                            java.util.Locale.US,
+                            "%.2f",
+                            average
+                        );
+
+
+                // Prepare row for the JTable
+                report.rows.add(new Object[]{
+
+                    studentId,
+                    studentName,
+                    course,
+                    yearLevel,
+                    enrollmentCount,
+                    gradesRecorded,
+                    averageText
+
+                });
+            }
+
+            return report;
+        }
+
+
+        @Override
+        protected void done() {
+
+            jButton23.setEnabled(true);
+            jButton23.setText("Generate");
+
+            try {
+
+                ReportData report = get();
+
+
+                // UPDATE SUMMARY LABELS
+                jLabel35.setText(
+                    "Total Students: " + report.totalStudents
+                );
+
+                jLabel36.setText(
+                    "Enrollments: " + report.totalEnrollments
+                );
+
+                jLabel37.setText(
+                    "Grades Recorded: " + report.totalGrades
+                );
+
+                jLabel38.setText(
+                    "Pending Grades: " + report.pendingGrades
+                );
+
+
+                // CREATE REPORT TABLE MODEL
+                DefaultTableModel model =
+                        new DefaultTableModel(
+                            new String[]{
+
+                                "Student ID",
+                                "Student Name",
+                                "Course",
+                                "Year",
+                                "Enrollments",
+                                "Grades Recorded",
+                                "Average Grade"
+
+                            },
+                            0
+                        ) {
+
+                    @Override
+                    public boolean isCellEditable(
+                            int row,
+                            int column
+                    ) {
+                        return false;
+                    }
+                };
+
+
+                // APPLY SEARCH FILTER
+                for (Object[] row : report.rows) {
+
+                    String searchableText = "";
+
+                    for (Object value : row) {
+                        searchableText +=
+                                String.valueOf(value) + " ";
+                    }
+
+                    if (search.isEmpty()
+                            || searchableText.toLowerCase()
+                                    .contains(search)) {
+
+                        model.addRow(row);
+                    }
+                }
+
+
+                // DISPLAY RESULTS
+                jTable5.setModel(model);
+
+                jTable5.setRowHeight(28);
+
+                jTable5.setAutoResizeMode(
+                    javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS
+                );
+
+
+            } catch (Exception ex) {
+
+                Throwable cause = ex.getCause() == null
+                        ? ex : ex.getCause();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Unable to generate reports:\n"
+                    + cause.getMessage(),
+                    "Reports Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    };
+
+    worker.execute();
+}
+// ==========================================
+// LOAD ENROLLED SUBJECTS FOR SELECTED STUDENT
+// ==========================================
+
+private void loadGradeSubjects() {
+
+    if (jComboBox2.getSelectedItem() == null) {
+        return;
+    }
+
+    String selectedStudent =
+            jComboBox2.getSelectedItem().toString();
+
+    int separator = selectedStudent.indexOf(" - ");
+
+    if (separator < 1) {
+        return;
+    }
+
+    int studentId = Integer.parseInt(
+        selectedStudent.substring(0, separator)
+    );
+
+    SwingWorker<List<String>, Void> worker =
+            new SwingWorker<List<String>, Void>() {
+
+        @Override
+        protected List<String> doInBackground() throws Exception {
+
+            String response = SupabaseClient.get(
+                "/rest/v1/enrollments?select=subject,status"
+                + "&student_id=eq." + studentId
+            );
+
+            JsonArray enrollments =
+                    JsonParser.parseString(response).getAsJsonArray();
+
+            List<String> subjects = new ArrayList<>();
+
+            for (int i = 0; i < enrollments.size(); i++) {
+
+                JsonObject enrollment =
+                        enrollments.get(i).getAsJsonObject();
+
+                if (!enrollment.get("status").getAsString()
+                        .equalsIgnoreCase("Enrolled")) {
+                    continue;
+                }
+
+                String subject =
+                        enrollment.get("subject").getAsString();
+
+                if (!subjects.contains(subject)) {
+                    subjects.add(subject);
+                }
+            }
+
+            return subjects;
+        }
+
+        @Override
+        protected void done() {
+
+            try {
+
+                List<String> subjects = get();
+
+                jComboBox3.removeAllItems();
+
+                for (String subject : subjects) {
+                    jComboBox3.addItem(subject);
+                }
+
+            } catch (Exception ex) {
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Unable to load enrolled subjects:\n"
+                    + ex.getMessage(),
+                    "Grades Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    };
+
+    worker.execute();
+}// ==========================================
+// LOAD GRADES FROM SUPABASE
+// ==========================================
+
+private void loadGrades() {
+
+    SwingWorker<List<Object[]>, Void> worker =
+            new SwingWorker<List<Object[]>, Void>() {
+
+        @Override
+        protected List<Object[]> doInBackground() throws Exception {
+
+            String studentResponse = SupabaseClient.get(
+                "/rest/v1/students?select=id,first_name,last_name"
+            );
+
+            JsonArray students =
+                    JsonParser.parseString(studentResponse).getAsJsonArray();
+
+            Map<Integer, String> studentNames = new HashMap<>();
+
+            for (int i = 0; i < students.size(); i++) {
+
+                JsonObject student = students.get(i).getAsJsonObject();
+
+                int id = student.get("id").getAsInt();
+
+                String name =
+                        student.get("first_name").getAsString()
+                        + " "
+                        + student.get("last_name").getAsString();
+
+                studentNames.put(id, name);
+            }
+
+            String gradeResponse = SupabaseClient.get(
+                "/rest/v1/grades?select=student_id,subject,grade"
+            );
+
+            JsonArray grades =
+                    JsonParser.parseString(gradeResponse).getAsJsonArray();
+
+            List<Object[]> rows = new ArrayList<>();
+
+            for (int i = 0; i < grades.size(); i++) {
+
+                JsonObject grade = grades.get(i).getAsJsonObject();
+
+                int studentId =
+                        grade.get("student_id").getAsInt();
+
+                String studentName =
+                        studentNames.getOrDefault(
+                            studentId,
+                            "Unknown Student"
+                        );
+
+                String subject =
+                        grade.get("subject").getAsString();
+
+                double gradeValue =
+                        grade.get("grade").getAsDouble();
+
+                String remarks =
+                        gradeValue >= 75 ? "Passed" : "Failed";
+
+                rows.add(new Object[]{
+                    studentId,
+                    studentName,
+                    subject,
+                    String.format(java.util.Locale.US, "%.2f", gradeValue),
+                    "—",
+                    remarks
+                });
+            }
+
+            return rows;
+        }
+
+        @Override
+        protected void done() {
+
+            try {
+
+                gradeRows.clear();
+                gradeRows.addAll(get());
+
+                filterGrades();
+
+            } catch (Exception ex) {
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Unable to load grades:\n"
+                    + ex.getMessage(),
+                    "Grades Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    };
+
+    worker.execute();
+}
+// ==========================================
+// SEARCH GRADES
+// ==========================================
+
+private void filterGrades() {
+
+    String search = jTextField12.getText()
+            .trim()
+            .toLowerCase();
+
+    DefaultTableModel model = new DefaultTableModel(
+        new String[]{
+            "Student ID",
+            "Student Name",
+            "Subject",
+            "Grade",
+            "Equivalent",
+            "Remarks"
+        },
+        0
+    ) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+
+    for (Object[] row : gradeRows) {
+
+        String searchableText = "";
+
+        for (Object value : row) {
+            searchableText += String.valueOf(value) + " ";
+        }
+
+        if (search.isEmpty()
+                || searchableText.toLowerCase().contains(search)) {
+
+            model.addRow(row);
+        }
+    }
+
+    jTable6.setModel(model);
+    jTable6.setRowHeight(28);
+}
+// ==========================================
+// SAVE GRADE TO SUPABASE
+// ==========================================
+
+private void saveGrade() {
+
+    if (jComboBox2.getSelectedItem() == null
+            || jComboBox3.getSelectedItem() == null) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Please select a student and subject.",
+            "Missing Information",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        return;
+    }
+
+    String selectedStudent =
+            jComboBox2.getSelectedItem().toString();
+
+    int separator = selectedStudent.indexOf(" - ");
+
+    if (separator < 1) {
+        return;
+    }
+
+    int studentId = Integer.parseInt(
+        selectedStudent.substring(0, separator)
+    );
+
+    String subject =
+            jComboBox3.getSelectedItem().toString();
+
+    double gradeValue;
+
+    try {
+
+        gradeValue = Double.parseDouble(
+            jTextField11.getText().trim()
+        );
+
+        if (gradeValue < 0 || gradeValue > 100) {
+            throw new NumberFormatException();
+        }
+
+    } catch (NumberFormatException ex) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Please enter a valid grade between 0 and 100.",
+            "Invalid Grade",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        jTextField11.requestFocus();
+        return;
+    }
+
+    JsonObject grade = new JsonObject();
+
+    grade.addProperty("student_id", studentId);
+    grade.addProperty("subject", subject);
+    grade.addProperty("grade", gradeValue);
+
+    jButton25.setEnabled(false);
+    jButton25.setText("Saving...");
+
+    SwingWorker<Void, Void> worker =
+            new SwingWorker<Void, Void>() {
+
+        @Override
+        protected Void doInBackground() throws Exception {
+
+            String encodedSubject =
+                    URLEncoder.encode(subject, "UTF-8")
+                    .replace("+", "%20");
+
+            String endpoint =
+                    "/rest/v1/grades"
+                    + "?student_id=eq." + studentId
+                    + "&subject=eq." + encodedSubject
+                    + "&select=student_id";
+
+            String existingResponse =
+                    SupabaseClient.get(endpoint);
+
+            JsonArray existingGrades =
+                    JsonParser.parseString(existingResponse).getAsJsonArray();
+
+            if (existingGrades.size() > 0) {
+
+                // Update existing grade.
+                SupabaseClient.patch(
+                    "/rest/v1/grades"
+                    + "?student_id=eq." + studentId
+                    + "&subject=eq." + encodedSubject,
+                    grade
+                );
+
+            } else {
+
+                // Insert new grade.
+                SupabaseClient.post(
+                    "/rest/v1/grades",
+                    grade
+                );
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void done() {
+
+            jButton25.setEnabled(true);
+            jButton25.setText("Save Grade");
+
+            try {
+
+                get();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Grade successfully saved!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+
+                jTextField11.setText("");
+
+                loadGrades();
+                updateDashboardCounts();
+
+            } catch (Exception ex) {
+
+                Throwable cause = ex.getCause() == null
+                        ? ex : ex.getCause();
+
+                JOptionPane.showMessageDialog(
+                    StudentManagementSystem.this,
+                    "Unable to save grade:\n"
+                    + cause.getMessage(),
+                    "Save Grade Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    };
+
+    worker.execute();
+}
+// ==========================================
+// EXPORT REPORTS TO CSV
+// ==========================================
+
+private void exportReportsCSV() {
+
+    if (jTable5.getRowCount() == 0) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "There are no report records to export.",
+            "Export Reports",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        return;
+    }
+
+    JFileChooser fileChooser = new JFileChooser();
+
+    fileChooser.setDialogTitle("Save Academic Report");
+
+    fileChooser.setSelectedFile(
+        new File("Academic_Report.csv")
+    );
+
+    int result = fileChooser.showSaveDialog(this);
+
+    if (result != JFileChooser.APPROVE_OPTION) {
+        return;
+    }
+
+    File file = fileChooser.getSelectedFile();
+
+    // Automatically add .csv extension
+    if (!file.getName().toLowerCase().endsWith(".csv")) {
+
+        file = new File(
+            file.getParentFile(),
+            file.getName() + ".csv"
+        );
+    }
+
+    // Confirm overwrite
+    if (file.exists()) {
+
+        int overwrite = JOptionPane.showConfirmDialog(
+            this,
+            "This file already exists. Replace it?",
+            "Confirm Export",
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if (overwrite != JOptionPane.YES_OPTION) {
+            return;
+        }
+    }
+
+    try (BufferedWriter writer =
+            Files.newBufferedWriter(
+                file.toPath(),
+                StandardCharsets.UTF_8
+            )) {
+
+        // UTF-8 BOM for spreadsheet compatibility
+        writer.write('\uFEFF');
+
+        int columns = jTable5.getColumnCount();
+        int rows = jTable5.getRowCount();
+
+
+        // WRITE HEADERS
+        for (int col = 0; col < columns; col++) {
+
+            writer.write(
+                escapeCSV(jTable5.getColumnName(col))
+            );
+
+            if (col < columns - 1) {
+                writer.write(",");
+            }
+        }
+
+        writer.newLine();
+
+
+        // WRITE REPORT DATA
+        for (int row = 0; row < rows; row++) {
+
+            for (int col = 0; col < columns; col++) {
+
+                Object value =
+                        jTable5.getValueAt(row, col);
+
+                writer.write(
+                    escapeCSV(value)
+                );
+
+                if (col < columns - 1) {
+                    writer.write(",");
+                }
+            }
+
+            writer.newLine();
+        }
+
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Report successfully exported!\n"
+            + file.getAbsolutePath(),
+            "Export Successful",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+
+    } catch (Exception ex) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Unable to export report:\n"
+            + ex.getMessage(),
+            "Export Error",
+            JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+
+
+// Escape commas, quotes, and newlines for CSV
+private String escapeCSV(Object value) {
+
+    String text = String.valueOf(value);
+
+    text = text.replace("\"", "\"\"");
+
+    return "\"" + text + "\"";
 }
 }
